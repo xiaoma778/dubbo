@@ -25,6 +25,7 @@ import io.netty.channel.ChannelPromise;
 
 /**
  * NettyClientHandler
+ * 封装 Netty 客户端事件，处理连接、断开、读取、写入和异常等
  */
 @io.netty.channel.ChannelHandler.Sharable
 public class NettyClientHandler extends ChannelDuplexHandler {

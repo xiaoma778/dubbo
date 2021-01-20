@@ -1,0 +1,5 @@
+michelin=org.apache.dubbo.bootstrap.maqi.impl.wheel.MichelinWheelMaker
+adaptive=org.apache.dubbo.bootstrap.maqi.impl.wheel.AdaptiveWheelMaker
+
+#aop 不需要名称
+org.apache.dubbo.bootstrap.maqi.impl.wheel.WheelMakerWrapper

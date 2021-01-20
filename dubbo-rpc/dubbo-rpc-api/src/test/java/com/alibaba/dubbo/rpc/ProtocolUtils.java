@@ -16,6 +16,9 @@
  */
 package com.alibaba.dubbo.rpc;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import com.alibaba.dubbo.common.URL;
 import com.alibaba.dubbo.common.extension.ExtensionLoader;
 
@@ -42,5 +45,4 @@ public class ProtocolUtils {
     public static <T> Exporter<T> export(T instance, Class<T> type, URL url) {
         return protocol.export(proxy.getInvoker(instance, type, url));
     }
-
 }

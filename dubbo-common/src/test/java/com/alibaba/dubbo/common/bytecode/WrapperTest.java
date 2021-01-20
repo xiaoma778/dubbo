@@ -16,6 +16,8 @@
  */
 package com.alibaba.dubbo.common.bytecode;
 
+import java.util.Arrays;
+
 import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -29,6 +31,7 @@ public class WrapperTest {
         String[] ns = w.getDeclaredMethodNames();
         assertEquals(ns.length, 5);
         ns = w.getMethodNames();
+        System.out.println("getMethodNames : " + Arrays.asList(ns));
         assertEquals(ns.length, 6);
 
         Object obj = new Impl1();
@@ -38,6 +41,7 @@ public class WrapperTest {
         assertEquals(w.getPropertyValue(obj, "name"), "changed");
 
         w.invokeMethod(obj, "hello", new Class<?>[]{String.class}, new Object[]{"qianlei"});
+        System.out.println(w.invokeMethod(obj, "showInt", new Class<?>[]{Integer.class}, new Object[]{123321}));
     }
 
     // bug: DUBBO-132

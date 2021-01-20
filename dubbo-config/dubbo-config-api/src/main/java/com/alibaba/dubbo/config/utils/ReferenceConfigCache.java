@@ -16,8 +16,10 @@
  */
 package com.alibaba.dubbo.config.utils;
 
+import com.alibaba.dubbo.common.extension.ExtensionLoader;
 import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.config.ReferenceConfig;
+import com.alibaba.dubbo.rpc.Protocol;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -149,5 +151,10 @@ public class ReferenceConfigCache {
 
     public static interface KeyGenerator {
         String generateKey(ReferenceConfig<?> referenceConfig);
+    }
+
+    public static void main(String[] args) {
+        Protocol protocol = ExtensionLoader.getExtensionLoader(Protocol.class).getAdaptiveExtension();
+        System.out.println(protocol);
     }
 }

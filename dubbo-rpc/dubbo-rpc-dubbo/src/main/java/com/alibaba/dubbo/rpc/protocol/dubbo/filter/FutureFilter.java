@@ -69,6 +69,9 @@ public class FutureFilter implements Filter {
     }
 
     private void asyncCallback(final Invoker<?> invoker, final Invocation invocation) {
+        // 这里 getFutre() 的值是在 DubboInvoke.doInvoke() 方法中通过 RpcContext.getContext().setFuture(new FutureAdapter<Object>(future)) 设置的
+        // 因为在当前的 FutureFilter 和 DubboInvoke 是在一个责任链中执行的，而当前类的 invoke() 方法是先调用 invoker.invoke() 方法执行后面的逻辑，完成以后
+        // 再回来这里继续处理同/异步的情况
         Future<?> f = RpcContext.getContext().getFuture();
         if (f instanceof FutureAdapter) {
             ResponseFuture future = ((FutureAdapter<?>) f).getFuture();

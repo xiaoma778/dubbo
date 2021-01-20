@@ -22,18 +22,58 @@
        http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd">
 
     <!-- provider's application name, used for tracing dependency relationship -->
-    <dubbo:application name="demo-provider"/>
+<!--    <dubbo:application id="dubboApplicationConfig" name="demo-provider"/>-->
 
     <!-- use multicast registry center to export service -->
-    <dubbo:registry address="multicast://224.5.6.7:1234"/>
+<!--    <dubbo:registry address="multicast://224.5.6.7:1234"/>-->
+<!--    <dubbo:registry id="dubboRegistryConfig" address="zookeeper://127.0.0.1:2181"/>-->
 
     <!-- use dubbo protocol to export service on port 20880 -->
-    <dubbo:protocol name="dubbo" port="20880"/>
+<!--    <dubbo:protocol id="dubboProtocolConfig" name="dubbo" port="20880"/>-->
 
     <!-- service implementation, as same as regular local bean -->
     <bean id="demoService" class="com.alibaba.dubbo.demo.provider.DemoServiceImpl"/>
 
     <!-- declare the service interface to be exported -->
-    <dubbo:service interface="com.alibaba.dubbo.demo.DemoService" ref="demoService"/>
+<!--    <dubbo:service interface="com.alibaba.dubbo.demo.DemoService" ref="demoService" export="true"/>-->
 
+    <bean id="dubboApplicationConfig" class="com.alibaba.dubbo.config.ApplicationConfig">
+        <property name="name" value="demo-provider"/>
+    </bean>
+
+    <bean id="dubboRegistryConfig" class="com.alibaba.dubbo.config.RegistryConfig">
+<!--        <property name="address" value="zookeeper://127.0.0.1:2181"/>-->
+        <property name="address" value="zookeeper://zoo1:2181?backup=zoo2:2181,zoo3:2181"/>
+    </bean>
+
+    <bean id="dubboProtocolConfig" class="com.alibaba.dubbo.config.ProtocolConfig">
+<!--        <property name="name" value="injvm"/>-->
+        <property name="name" value="dubbo"/>
+        <property name="port" value="20880"/>
+<!--        <property name="server" value="netty4"/>-->
+    </bean>
+
+    <bean id="demoServiceBean" class="com.alibaba.dubbo.config.spring.ServiceBean">
+        <property name="export" value="true" />
+        <property name="interface" value="com.alibaba.dubbo.demo.DemoService"/>
+        <property name="ref" ref="demoService"/>
+        <property name="application" ref="dubboApplicationConfig"/>
+        <property name="registry" ref="dubboRegistryConfig"/>
+        <property name="protocol" ref="dubboProtocolConfig"/>
+        <property name="version" value="1.0"/>
+        <property name="timeout" value="100000"/>
+        <property name="scope" value="remote"/>
+<!--        <property name="provider" ref=""/>-->
+<!--        <property name="delay" value="1000" />-->
+<!--        <property name="sent" value="false"/>--><!-- NettyChannel.java类中 108 行说明 -->
+        <property name="methods">
+            <list>
+                <bean class="com.alibaba.dubbo.config.MethodConfig">
+                    <property name="name" value="sayHello"/>
+                    <property name="executes" value="15"/>
+                    <property name="retries" value="3"/>
+                </bean>
+            </list>
+        </property>
+    </bean>
 </beans>

@@ -85,7 +85,7 @@ public class RpcUtils {
 
     /**
      * Idempotent operation: invocation id will be added in async operation by default
-     *
+     * 幂等操作，如果是异步调用的话，就往附件信息中设置一个原子自增的 id 值（RpcInvocation.attachments.put("id", String.valueOf(INVOKE_ID.getAndIncrement())）
      * @param url
      * @param inv
      */

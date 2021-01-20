@@ -68,31 +68,36 @@ public class DubboInvoker<T> extends AbstractInvoker<T> {
     protected Result doInvoke(final Invocation invocation) throws Throwable {
         RpcInvocation inv = (RpcInvocation) invocation;
         final String methodName = RpcUtils.getMethodName(invocation);
+        // 设置 path 和 version 到 attachment 中
         inv.setAttachment(Constants.PATH_KEY, getUrl().getPath());
         inv.setAttachment(Constants.VERSION_KEY, version);
 
         ExchangeClient currentClient;
         if (clients.length == 1) {
+            // 从 clients 数组中获取 ExchangeClient
             currentClient = clients[0];
         } else {
             currentClient = clients[index.getAndIncrement() % clients.length];
         }
         try {
+            // 获取异步配置
             boolean isAsync = RpcUtils.isAsync(getUrl(), invocation);
-            boolean isOneway = RpcUtils.isOneway(getUrl(), invocation);
+            boolean isOneway = RpcUtils.isOneway(getUrl(), invocation);// isOneway 为 true，表示“单向”通信
             int timeout = getUrl().getMethodParameter(methodName, Constants.TIMEOUT_KEY, Constants.DEFAULT_TIMEOUT);
+
+            // 异步无返回值
             if (isOneway) {
                 boolean isSent = getUrl().getMethodParameter(methodName, Constants.SENT_KEY, false);
-                currentClient.send(inv, isSent);
+                currentClient.send(inv, isSent);// 发送请求
+                RpcContext.getContext().setFuture(null);// 设置上下文中的 future 字段为 null
+                return new RpcResult();// 返回一个空的 RpcResult
+            } else if (isAsync) {// 异步有返回值（currentClient = ReferenceCountExchangeClient）
+                ResponseFuture future = currentClient.request(inv, timeout);// 发送请求，并得到一个 ResponseFuture 实例
+                RpcContext.getContext().setFuture(new FutureAdapter<Object>(future));// 设置 future 到上下文中
+                return new RpcResult();// 暂时返回一个空结果
+            } else {// 同步调用
                 RpcContext.getContext().setFuture(null);
-                return new RpcResult();
-            } else if (isAsync) {
-                ResponseFuture future = currentClient.request(inv, timeout);
-                RpcContext.getContext().setFuture(new FutureAdapter<Object>(future));
-                return new RpcResult();
-            } else {
-                RpcContext.getContext().setFuture(null);
-                return (Result) currentClient.request(inv, timeout).get();
+                return (Result) currentClient.request(inv, timeout).get();// 发送请求，得到一个 ResponseFuture 实例，并调用该实例的 get 方法进行等待
             }
         } catch (TimeoutException e) {
             throw new RpcException(RpcException.TIMEOUT_EXCEPTION, "Invoke remote method timeout. method: " + invocation.getMethodName() + ", provider: " + getUrl() + ", cause: " + e.getMessage(), e);

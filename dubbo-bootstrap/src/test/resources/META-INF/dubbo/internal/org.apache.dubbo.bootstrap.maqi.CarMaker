@@ -1,0 +1,2 @@
+racecar=org.apache.dubbo.bootstrap.maqi.impl.car.RaceCarMaker
+truckcar=org.apache.dubbo.bootstrap.maqi.impl.car.TruckCarMaker

@@ -406,12 +406,13 @@ public abstract class AbstractRegistry implements Registry {
             notified.putIfAbsent(url, new ConcurrentHashMap<String, List<URL>>());
             categoryNotified = notified.get(url);
         }
+        // 对 configurators、routers、providers 路径下的变更进行 notify
         for (Map.Entry<String, List<URL>> entry : result.entrySet()) {
             String category = entry.getKey();
             List<URL> categoryList = entry.getValue();
             categoryNotified.put(category, categoryList);
-            saveProperties(url);
-            listener.notify(categoryList);
+            saveProperties(url);//保存在本地
+            listener.notify(categoryList);//这里的 listener 是 RegistryDirectory
         }
     }
 

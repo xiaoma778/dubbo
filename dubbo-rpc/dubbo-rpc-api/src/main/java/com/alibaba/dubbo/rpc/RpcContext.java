@@ -121,6 +121,11 @@ public class RpcContext {
         return LOCAL.get();
     }
 
+    public static void main(String[] args) {
+        RpcContext a = RpcContext.getContext();
+        System.out.println(a.url);
+    }
+
     /**
      * remove context.
      *
@@ -554,6 +559,11 @@ public class RpcContext {
         return invokers == null && invoker != null ? (List) Arrays.asList(invoker) : invokers;
     }
 
+    /**
+     * 将 invokers 中的 url 取出来并保存到当前线程的 RpcContent 对象的 urls 字段中
+     * @param invokers
+     * @return
+     */
     public RpcContext setInvokers(List<Invoker<?>> invokers) {
         this.invokers = invokers;
         if (invokers != null && !invokers.isEmpty()) {

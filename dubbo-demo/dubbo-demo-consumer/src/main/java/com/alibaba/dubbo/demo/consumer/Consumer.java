@@ -16,7 +16,15 @@
  */
 package com.alibaba.dubbo.demo.consumer;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
 import com.alibaba.dubbo.demo.DemoService;
+import com.alibaba.dubbo.remoting.exchange.ResponseFuture;
+import com.alibaba.dubbo.remoting.exchange.support.DefaultFuture;
+import com.alibaba.dubbo.rpc.RpcContext;
+import com.alibaba.dubbo.rpc.protocol.dubbo.FutureAdapter;
+
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class Consumer {
@@ -27,20 +35,35 @@ public class Consumer {
         System.setProperty("java.net.preferIPv4Stack", "true");
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[]{"META-INF/spring/dubbo-demo-consumer.xml"});
         context.start();
+
         DemoService demoService = (DemoService) context.getBean("demoService"); // get remote service proxy
 
-        while (true) {
-            try {
-                Thread.sleep(1000);
-                String hello = demoService.sayHello("world"); // call remote method
-                System.out.println(hello); // get result
-
-            } catch (Throwable throwable) {
-                throwable.printStackTrace();
-            }
-
-
+        String hello = demoService.sayHello("world"); // call remote method
+        System.out.println(hello);
+        Future future = RpcContext.getContext().getFuture();
+        try {
+            hello = (String)future.get();
+            System.out.println(hello); // get result
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
         }
+
+
+        context.close();
+        //while (true) {
+        //    try {
+        //        Thread.sleep(1000);
+        //        String hello = demoService.sayHello("world"); // call remote method
+        //        System.out.println(hello); // get result
+        //
+        //    } catch (Throwable throwable) {
+        //        throwable.printStackTrace();
+        //    }
+        //
+        //
+        //}
 
     }
 }

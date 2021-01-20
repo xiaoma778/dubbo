@@ -42,10 +42,11 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class FailbackRegistry extends AbstractRegistry {
 
-    // Scheduled executor service
+    // Scheduled executor service 定时任务执行器
     private final ScheduledExecutorService retryExecutor = Executors.newScheduledThreadPool(1, new NamedThreadFactory("DubboRegistryFailedRetryTimer", true));
 
     // Timer for failure retry, regular check if there is a request for failure, and if there is, an unlimited retry
+    // 失败重试定时器，定时检查是否有请求失败，如有，无限次重试
     private final ScheduledFuture<?> retryFuture;
 
     private final Set<URL> failedRegistered = new ConcurrentHashSet<URL>();
@@ -133,12 +134,16 @@ public abstract class FailbackRegistry extends AbstractRegistry {
         failedRegistered.remove(url);
         failedUnregistered.remove(url);
         try {
+            // 模板方法，由子类实现
             // Sending a registration request to the server side
+            // 向服务器端发送注册请求
             doRegister(url);
         } catch (Exception e) {
             Throwable t = e;
 
+            // 获取 check 参数，若 check = true 将会直接抛出异常
             // If the startup detection is opened, the Exception is thrown directly.
+            // 如果开启了启动时检测，则直接抛出异常
             boolean check = getUrl().getParameter(Constants.CHECK_KEY, true)
                     && url.getParameter(Constants.CHECK_KEY, true)
                     && !Constants.CONSUMER_PROTOCOL.equals(url.getProtocol());
@@ -152,6 +157,7 @@ public abstract class FailbackRegistry extends AbstractRegistry {
                 logger.error("Failed to register " + url + ", waiting for retry, cause: " + t.getMessage(), t);
             }
 
+            // 将失败的注册请求记录到失败列表，定时重试
             // Record a failed registration request to a failed list, retry regularly
             failedRegistered.add(url);
         }
@@ -254,6 +260,12 @@ public abstract class FailbackRegistry extends AbstractRegistry {
         }
     }
 
+    /**
+     *
+     * @param url   protocol = consumer 的 URL
+     * @param listener  RegistryDirectory
+     * @param urls
+     */
     @Override
     protected void notify(URL url, NotifyListener listener, List<URL> urls) {
         if (url == null) {

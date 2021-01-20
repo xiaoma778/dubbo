@@ -26,10 +26,15 @@ import com.alibaba.dubbo.config.ServiceConfig;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.dubbo.config.spring.extension.SpringExtensionFactory;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
@@ -46,7 +51,7 @@ import java.util.Map;
  *
  * @export
  */
-public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean, DisposableBean, ApplicationContextAware, ApplicationListener<ContextRefreshedEvent>, BeanNameAware {
+public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean, DisposableBean, ApplicationContextAware, ApplicationListener<ContextRefreshedEvent>, BeanNameAware, BeanFactoryPostProcessor {
 
     private static final long serialVersionUID = 213195494150089726L;
 
@@ -76,6 +81,11 @@ public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
+        //
+        String[] beanNames = applicationContext.getBeanDefinitionNames();
+        for (String _beanName : beanNames) {
+            System.out.println("beanName : " + _beanName);
+        }
         this.applicationContext = applicationContext;
         SpringExtensionFactory.addApplicationContext(applicationContext);
         if (applicationContext != null) {
@@ -279,5 +289,18 @@ public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean
             return AopUtils.getTargetClass(ref);
         }
         return super.getServiceClass(ref);
+    }
+
+    @Override
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory configurableListableBeanFactory) throws BeansException {
+        String[] beanNames = configurableListableBeanFactory.getBeanDefinitionNames();
+        for (String beanName : beanNames) {
+            BeanDefinition beanDefinition = configurableListableBeanFactory.getBeanDefinition(beanName);
+            System.out.println(beanDefinition);
+            if ("com.alibaba.dubbo.demo.DemoService".equals(beanName) || "demoService".equals(beanName)) {
+                Object bean = configurableListableBeanFactory.getBean(beanName);
+                System.out.println(bean);
+            }
+        }
     }
 }

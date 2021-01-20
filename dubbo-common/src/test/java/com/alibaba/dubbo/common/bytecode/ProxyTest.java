@@ -25,6 +25,7 @@ import org.junit.Test;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 public class ProxyTest extends TestCase {
     public void testMain() throws Exception {
@@ -72,9 +73,61 @@ public class ProxyTest extends TestCase {
         }
     }
 
-    public static interface ITest {
+    @Test
+    public void testOther() {
+        Proxy testProxy = Proxy.getProxy(ITest.class);
+        ITest test = (ITest)testProxy.newInstance(new InvocationHandler() {
+            private String name;
+
+            public String getName() {
+                return name;
+            }
+
+            public void setName(String name, String name2) {
+                this.name = name;
+            }
+            @Override
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                //String methodName = method.getName();
+                //Class<?>[] methodParamterTypes = method.getParameterTypes();
+                // 拦截定义在 Object 类中的方法（未被子类重写），比如 wait/notify
+                //if (method.getDeclaringClass() == Object.class) {
+                //    return method.invoke(, args);
+                //}
+                System.out.print(String.format("method : %s, args : %s", method.getName(), args.length > 0 ? Arrays.asList(args) : "无参"));
+                if ("getName".equals(method.getName())) {
+                    String value = getName();
+                    System.out.println(" return value : " + value);
+                    return value;
+                } else if ("setName".equals(method.getName())) {
+                    System.out.println();
+                    setName(String.valueOf(args[0]), String.valueOf(args[1]));
+                }
+                return null;
+            }
+        });
+        test.setName("zhangsan", "si");
+        System.out.println(test.getName());
+    }
+
+    public interface ITest {
         String getName();
 
         void setName(String name, String name2);
+    }
+
+    public static class ITestImpl implements ITest {
+        private String name;
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public void setName(String name, String name2) {
+            this.name = name;
+            System.out.println(String.format("name = %s, name2 = %s", name, name2));
+        }
     }
 }

@@ -31,6 +31,13 @@ public class ConsumerModel {
 
     private final Map<Method, ConsumerMethodModel> methodModels = new IdentityHashMap<Method, ConsumerMethodModel>();
 
+    /**
+     *
+     * @param serviceName 引用的远程服务名（如：com.alibaba.dubbo.demo.DemoService:1.0）
+     * @param metadata ReferenceBean 信息
+     * @param proxyObject 代理对象
+     * @param methods 引用的远程服务的方法组
+     */
     public ConsumerModel(String serviceName,ReferenceConfig metadata, Object proxyObject, Method[] methods) {
         this.serviceName = serviceName;
         this.metadata = metadata;

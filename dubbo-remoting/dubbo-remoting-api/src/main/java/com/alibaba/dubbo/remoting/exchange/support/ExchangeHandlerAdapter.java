@@ -23,6 +23,7 @@ import com.alibaba.dubbo.remoting.telnet.support.TelnetHandlerAdapter;
 
 /**
  * ExchangeHandlerAdapter
+ * 用于查找服务方法并调用
  */
 public abstract class ExchangeHandlerAdapter extends TelnetHandlerAdapter implements ExchangeHandler {
 

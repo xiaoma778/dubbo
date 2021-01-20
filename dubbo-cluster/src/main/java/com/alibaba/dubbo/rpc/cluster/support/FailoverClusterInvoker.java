@@ -65,6 +65,8 @@ public class FailoverClusterInvoker<T> extends AbstractClusterInvoker<T> {
         for (int i = 0; i < len; i++) {
             //Reselect before retry to avoid a change of candidate `invokers`.
             //NOTE: if `invokers` changed, then `invoked` also lose accuracy.
+            // 重试时，进行重新选择，避免重试时 invoker 列表已发生变化
+            // 注意：如果列表发生了变化，那么 invoked 判断会失效，因为 invoker 已经改变
             if (i > 0) {
                 checkWhetherDestroyed();
                 copyinvokers = list(invocation);

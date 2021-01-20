@@ -33,7 +33,7 @@ import java.util.Collections;
 /**
  * ListenerProtocol
  */
-public class ProtocolListenerWrapper implements Protocol {
+public class  ProtocolListenerWrapper implements Protocol {
 
     private final Protocol protocol;
 

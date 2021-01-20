@@ -51,8 +51,8 @@ public class ReferenceConfigTest {
         rc.setInjvm(false);
 
         try {
-            demoService.export();
-            rc.get();
+            demoService.export();//服务导出
+            rc.get();//服务引入
             Assert.assertTrue(!Constants.LOCAL_PROTOCOL.equalsIgnoreCase(
                     rc.getInvoker().getUrl().getProtocol()));
         } finally {

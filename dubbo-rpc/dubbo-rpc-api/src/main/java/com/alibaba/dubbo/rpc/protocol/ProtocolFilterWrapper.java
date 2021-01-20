@@ -42,7 +42,7 @@ public class ProtocolFilterWrapper implements Protocol {
         }
         this.protocol = protocol;
     }
-
+    //这里的作用就是把 invoker 和 filters 串起来形成一个链表，当调用方调用时就会执行这整个链路（会先执行 filters 里的最后在执行 invoker），责任链模式吧
     private static <T> Invoker<T> buildInvokerChain(final Invoker<T> invoker, String key, String group) {
         Invoker<T> last = invoker;
         List<Filter> filters = ExtensionLoader.getExtensionLoader(Filter.class).getActivateExtension(invoker.getUrl(), key, group);

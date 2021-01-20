@@ -39,7 +39,7 @@ public class Transporters {
     public static Server bind(String url, ChannelHandler... handler) throws RemotingException {
         return bind(URL.valueOf(url), handler);
     }
-
+    //这里会绑定一个 DecodeHandler(HeaderExchangeHandler)，而 HeaderExchangeHandler 就封装了 request/response 的能力，当有请求或者响应都要通过它来处理
     public static Server bind(URL url, ChannelHandler... handlers) throws RemotingException {
         if (url == null) {
             throw new IllegalArgumentException("url == null");
@@ -51,8 +51,10 @@ public class Transporters {
         if (handlers.length == 1) {
             handler = handlers[0];
         } else {
+            // 如果 handlers 元素数量大于1，则创建 ChannelHandler 分发器
             handler = new ChannelHandlerDispatcher(handlers);
         }
+        // 获取自适应 Transporter 实例，并调用实例方法
         return getTransporter().bind(url, handler);
     }
 
@@ -70,8 +72,10 @@ public class Transporters {
         } else if (handlers.length == 1) {
             handler = handlers[0];
         } else {
+            // 如果 handler 数量大于1，则创建一个 ChannelHandler 分发器
             handler = new ChannelHandlerDispatcher(handlers);
         }
+        // 获取 Transporter 自适应拓展类，并调用 connect 方法生成 Client 实例
         return getTransporter().connect(url, handler);
     }
 

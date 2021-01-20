@@ -30,22 +30,34 @@ import com.alibaba.dubbo.remoting.transport.dispatcher.WrappedChannelHandler;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 
+/**
+ * 支持 dubbo 线程池调用业务方法
+ */
 public class AllChannelHandler extends WrappedChannelHandler {
 
     public AllChannelHandler(ChannelHandler handler, URL url) {
         super(handler, url);
     }
 
+    /**
+     * 处理连接事件（当客户端启动时会连接过来）
+     * @param channel
+     * @throws RemotingException
+     */
     @Override
     public void connected(Channel channel) throws RemotingException {
+        System.out.println("---------------------------------------- AllChannelHandler.connected() ----------------------------------------");
+        // 获取线程池
         ExecutorService cexecutor = getExecutorService();
         try {
+            // 将连接事件派发到线程池中处理
             cexecutor.execute(new ChannelEventRunnable(channel, handler, ChannelState.CONNECTED));
         } catch (Throwable t) {
             throw new ExecutionException("connect event", channel, getClass() + " error when process connected event .", t);
         }
     }
 
+    /** 处理断开事件 */
     @Override
     public void disconnected(Channel channel) throws RemotingException {
         ExecutorService cexecutor = getExecutorService();
@@ -56,21 +68,27 @@ public class AllChannelHandler extends WrappedChannelHandler {
         }
     }
 
+    /** 处理请求和响应消息，这里的 message 变量类型可能是 Request，也可能是 Response */
     @Override
     public void received(Channel channel, Object message) throws RemotingException {
+        System.out.println("---------------------------------------- AllChannelHandler.received() ----------------------------------------");
         ExecutorService cexecutor = getExecutorService();
         try {
+            // 将请求和响应消息派发到线程池中处理
             cexecutor.execute(new ChannelEventRunnable(channel, handler, ChannelState.RECEIVED, message));
         } catch (Throwable t) {
             //TODO A temporary solution to the problem that the exception information can not be sent to the opposite end after the thread pool is full. Need a refactoring
             //fix The thread pool is full, refuses to call, does not return, and causes the consumer to wait for time out
         	if(message instanceof Request && t instanceof RejectedExecutionException){
         		Request request = (Request)message;
-        		if(request.isTwoWay()){
+                // 如果通信方式为双向通信，此时将 Server side ... threadpool is exhausted
+                // 错误信息封装到 Response 中，并返回给服务消费方。
+                if(request.isTwoWay()){
         			String msg = "Server side(" + url.getIp() + "," + url.getPort() + ") threadpool is exhausted ,detail msg:" + t.getMessage();
         			Response response = new Response(request.getId(), request.getVersion());
         			response.setStatus(Response.SERVER_THREADPOOL_EXHAUSTED_ERROR);
         			response.setErrorMessage(msg);
+                    // 返回包含错误信息的 Response 对象
         			channel.send(response);
         			return;
         		}
@@ -79,6 +97,7 @@ public class AllChannelHandler extends WrappedChannelHandler {
         }
     }
 
+    /** 处理异常信息 */
     @Override
     public void caught(Channel channel, Throwable exception) throws RemotingException {
         ExecutorService cexecutor = getExecutorService();

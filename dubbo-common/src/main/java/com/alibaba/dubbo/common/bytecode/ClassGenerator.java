@@ -36,6 +36,7 @@ import java.lang.reflect.Modifier;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -326,4 +327,83 @@ public final class ClassGenerator {
 
     public static interface DC {
     } // dynamic class tag interface.
+
+    //public class proxy0 implements org.apache.dubbo.demo.DemoService {
+    // *
+    //     *     public static java.lang.reflect.Method[] methods;
+    // *
+    //     *     private java.lang.reflect.InvocationHandler handler;
+    // *
+    //     *     public proxy0() {
+    // *     }
+    // *
+    //     *     public proxy0(java.lang.reflect.InvocationHandler arg0) {
+    // *         handler = arg0;
+    // *     }
+    // *
+    //     *     public java.lang.String sayHello(java.lang.String arg0) {
+    // *         Object[] args = new Object[1];
+    // *         args[0] = ($w) arg0;
+    // *         //最后调用 InvocationHandler.invoke() 方法
+    // *         Object ret = handler.invoke(this, methods[0], args);
+    // *         return (java.lang.String) ret;
+    // *     }
+    // * }
+
+    /**
+     * 输出 proxy 代码片段，测试用
+     */
+    public void printClassCode() {
+        System.out.println("\n\n");
+        StringBuilder sb = new StringBuilder();
+        if (mInterfaces != null) {
+            Iterator<String> iterator = mInterfaces.iterator();
+            for (int i = 0; iterator.hasNext(); i++) {
+                String interfaceName = iterator.next();
+                if ("com.alibaba.dubbo.rpc.service.EchoService".equals(interfaceName))
+                    continue;
+
+                sb.append("public class proxy0 implements ").append(interfaceName).append(" {\n");
+                sb.append("\t").append(mFields.get(0)).append("\n\n");
+                sb.append("\t").append(mFields.get(1)).append("\n\n");
+                sb.append("\t").append("public proxy0() {}\n\n");
+                sb.append("\t").append(mConstructors.get(0)
+                    .replace("<init>", "proxy0")
+                    .replace("{", "{\n\t\t")
+                    .replace(";", ";\n\t")
+                    .replace("}", "}\n\t")
+                ).append("\n");
+                for (String method : mMethods) {
+                    sb.append("\t").append(method
+                        .replace("{", "{\n\t\t")
+                        .replace(";", ";\n\t\t")
+                        .replace("}", "\n\t}\n\t")
+                    ).append("\n");
+                    //sb.append("\t").append(mMethods.get(1)
+                    //    .replace("{", "{\n\t\t")
+                    //    .replace(";", ";\n\t\t")
+                    //    .replace("}", "}\n\t")
+                    //).append("\n");
+                }
+                sb.append("}\n\n");
+            }
+        } else {
+            sb.append(mClassName).append(" extend ").append(mSuperClass).append(" {\n");
+            for (String field : mFields) {
+                sb.append("\t").append(field).append("\n");
+            }
+
+            sb.append("\n");
+
+            for (String method : mMethods) {
+                sb.append("\t").append(
+                    method.replace("{ ", " {\n\t\t")
+                        .replace(" try {", "\n\t\ttry {")
+                    .replace(" }", "\n\t}")
+                ).append("\n\n");
+            }
+            sb.append("}");
+        }
+        System.out.println(sb.toString());
+    }
 }

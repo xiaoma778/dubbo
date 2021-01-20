@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * 该类维护了所有的 invoke 集合信息（服务消费端）
  * RegistryDirectory
  *
  */
@@ -228,6 +229,11 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
      * 1.If URL has been converted to invoker, it is no longer re-referenced and obtained directly from the cache, and notice that any parameter changes in the URL will be re-referenced.
      * 2.If the incoming invoker list is not empty, it means that it is the latest invoker list
      * 3.If the list of incoming invokerUrl is empty, It means that the rule is only a override rule or a route rule, which needs to be re-contrasted to decide whether to re-reference.
+     * <br />
+     * 根据 invokerUrls 列表转换为 invoker 列表。转换规则如下：
+     * 1.如果 url 已经被转换为 invoker，则不在重新引用，直接从缓存中获取，注意如果 url 中任何一个参数变更也会重新引用
+     * 2.如果传入的 invokerUrls 列表不为空，则表示最新的 invoker 列表
+     * 3.如果传入的 invokerUrls 列表是空，则表示只是下方的 override 规则或 route 规则，需要重新交叉对比，决定是否需要重新引用
      *
      * @param invokerUrls this parameter can't be null
      */
@@ -235,31 +241,33 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
     private void refreshInvoker(List<URL> invokerUrls) {
         if (invokerUrls != null && invokerUrls.size() == 1 && invokerUrls.get(0) != null
                 && Constants.EMPTY_PROTOCOL.equals(invokerUrls.get(0).getProtocol())) {
-            this.forbidden = true; // Forbid to access
-            this.methodInvokerMap = null; // Set the method invoker map to null
-            destroyAllInvokers(); // Close all invokers
+            this.forbidden = true; // Forbid to access 禁止访问
+            this.methodInvokerMap = null; // Set the method invoker map to null 置空列表
+            destroyAllInvokers(); // Close all invokers 关闭所有 Invoker
         } else {
-            this.forbidden = false; // Allow to access
+            this.forbidden = false; // Allow to access 允许访问
             Map<String, Invoker<T>> oldUrlInvokerMap = this.urlInvokerMap; // local reference
             if (invokerUrls.isEmpty() && this.cachedInvokerUrls != null) {
                 invokerUrls.addAll(this.cachedInvokerUrls);
             } else {
                 this.cachedInvokerUrls = new HashSet<URL>();
-                this.cachedInvokerUrls.addAll(invokerUrls);//Cached invoker urls, convenient for comparison
+                this.cachedInvokerUrls.addAll(invokerUrls);//Cached invoker urls, convenient for comparison 缓存 invokerUrls，便于交叉对比
             }
             if (invokerUrls.isEmpty()) {
                 return;
             }
-            Map<String, Invoker<T>> newUrlInvokerMap = toInvokers(invokerUrls);// Translate url list to Invoker map
-            Map<String, List<Invoker<T>>> newMethodInvokerMap = toMethodInvokers(newUrlInvokerMap); // Change method name to map Invoker Map
+            // todo 核心方法，圈起来要考，该方法会将 dubbo://192.168.xxx.xxx 这样的 url 转换成 DubboInvoker!!!
+            // 该方法中
+            Map<String, Invoker<T>> newUrlInvokerMap = toInvokers(invokerUrls);// Translate url list to Invoker map 将 invokerUrls 转换成 Invoker 集合
+            Map<String, List<Invoker<T>>> newMethodInvokerMap = toMethodInvokers(newUrlInvokerMap); // Change method name to map Invoker Map 换方法名映射 Invoker 列表
             // state change
-            // If the calculation is wrong, it is not processed.
+            // If the calculation is wrong, it is not processed. 如果计算错误，则不进行处理
             if (newUrlInvokerMap == null || newUrlInvokerMap.size() == 0) {
                 logger.error(new IllegalStateException("urls to invokers error .invokerUrls.size :" + invokerUrls.size() + ", invoker.size :0. urls :" + invokerUrls.toString()));
                 return;
             }
             this.methodInvokerMap = multiGroup ? toMergeMethodInvokerMap(newMethodInvokerMap) : newMethodInvokerMap;
-            this.urlInvokerMap = newUrlInvokerMap;
+            this.urlInvokerMap = newUrlInvokerMap;//将 invoker 列表缓存在本地静态变量中！！！
             try {
                 destroyUnusedInvokers(oldUrlInvokerMap, newUrlInvokerMap); // Close the unused Invoker
             } catch (Exception e) {
@@ -331,7 +339,8 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
 
     /**
      * Turn urls into invokers, and if url has been refer, will not re-reference.
-     *
+     * 将 urls 转换成 invokers，如果 url 已经被 reset 过，不再重新引用
+     * 该方法会将 dubbo://192.168.xxx.xxx 这样的 url 转换成 DubboInvoker
      * @param urls
      * @return invokers
      */
@@ -344,6 +353,7 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
         String queryProtocols = this.queryMap.get(Constants.PROTOCOL_KEY);
         for (URL providerUrl : urls) {
             // If protocol is configured at the reference side, only the matching protocol is selected
+            // 如果 reference 端配置了 protocol，则只选择匹配的 protocol
             if (queryProtocols != null && queryProtocols.length() > 0) {
                 boolean accept = false;
                 String[] acceptProtocols = queryProtocols.split(",");
@@ -373,6 +383,7 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
             }
             keys.add(key);
             // Cache key is url that does not merge with consumer side parameters, regardless of how the consumer combines parameters, if the server url changes, then refer again
+            // 缓存 key 为没有合并消费端参数的 URL，不管消费端如何合并参数，如果服务端 URL 发生变化，则重新 refer
             Map<String, Invoker<T>> localUrlInvokerMap = this.urlInvokerMap; // local reference
             Invoker<T> invoker = localUrlInvokerMap == null ? null : localUrlInvokerMap.get(key);
             if (invoker == null) { // Not in the cache, refer again
@@ -384,7 +395,8 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
                         enabled = url.getParameter(Constants.ENABLED_KEY, true);
                     }
                     if (enabled) {
-                        invoker = new InvokerDelegate<T>(protocol.refer(serviceType, url), url, providerUrl);
+                        // todo 这里会最终会调用 DubboProtocol.refer() 创建 DubboInvoker 并创建服务端连接!!!
+                        invoker = new InvokerDelegate<T>(protocol.refer(serviceType, url), url, providerUrl);// 重新 refer
                     }
                 } catch (Throwable t) {
                     logger.error("Failed to refer invoker for interface:" + serviceType + ",url:(" + url + ")" + t.getMessage(), t);

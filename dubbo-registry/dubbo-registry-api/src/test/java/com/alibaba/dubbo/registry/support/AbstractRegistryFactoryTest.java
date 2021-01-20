@@ -17,10 +17,12 @@
 package com.alibaba.dubbo.registry.support;
 
 import com.alibaba.dubbo.common.URL;
+import com.alibaba.dubbo.common.extension.ExtensionLoader;
 import com.alibaba.dubbo.common.utils.NetUtils;
 import com.alibaba.dubbo.registry.NotifyListener;
 import com.alibaba.dubbo.registry.Registry;
 import com.alibaba.dubbo.registry.RegistryFactory;
+import com.alibaba.dubbo.rpc.Protocol;
 
 import junit.framework.Assert;
 import org.junit.Test;
@@ -97,6 +99,12 @@ public class AbstractRegistryFactoryTest {
         Registry registry1 = registryFactory.getRegistry(URL.valueOf("dubbo://" + NetUtils.getLocalHost() + ":2233?group=aaa"));
         Registry registry2 = registryFactory.getRegistry(URL.valueOf("dubbo://" + NetUtils.getLocalHost() + ":2233?group=bbb"));
         Assert.assertNotSame(registry1, registry2);
+    }
+
+    @Test
+    public void test_Protocol() {
+        Protocol protocol = ExtensionLoader.getExtensionLoader(Protocol.class).getExtension("registry");
+        System.out.println(protocol.getClass().getName());
     }
 
 }

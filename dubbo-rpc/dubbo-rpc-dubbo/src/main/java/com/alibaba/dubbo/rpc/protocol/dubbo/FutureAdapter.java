@@ -61,6 +61,7 @@ public class FutureAdapter<V> implements Future<V> {
     @SuppressWarnings("unchecked")
     public V get() throws InterruptedException, ExecutionException {
         try {
+            System.out.println("----------------- FutureAdapter -----------------");
             return (V) (((Result) future.get()).recreate());
         } catch (RemotingException e) {
             throw new ExecutionException(e.getMessage(), e);
