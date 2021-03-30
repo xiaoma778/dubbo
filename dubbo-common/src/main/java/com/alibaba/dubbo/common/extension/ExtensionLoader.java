@@ -789,6 +789,9 @@ public class ExtensionLoader<T> {
 
     /**
      * 创建自适应扩展类，并帮创建后的自适应扩展类注入属性（ioc）
+     * 1.getAdaptiveExtensionClass() --> 加载扩展类（该方法会返回 cachedAdaptiveClass ）
+     * 2.newInstance() --> 实例化添加了 @Adaptive 注解的扩展类（cachedAdaptiveClass）
+     * 3.injectExtension() --> 为扩展类（cachedAdaptiveClass）注入属性
      * @return
      */
     @SuppressWarnings("unchecked")
@@ -802,7 +805,7 @@ public class ExtensionLoader<T> {
 
     /**
      * 获取自适应扩展类
-     * 如果 this.type 接口的实现类中有添加 Adaptive 注解的，则返回该 Adaptive 注解类，否则动态创建一个自适应扩展类
+     * 如果 this.type 接口的实现类中有添加 @Adaptive 类注解的，则返回该 Adaptive 注解类（保存在 cachedAdaptiveClass 中），否则动态创建一个自适应扩展类
      * @return
      */
     private Class<?> getAdaptiveExtensionClass() {

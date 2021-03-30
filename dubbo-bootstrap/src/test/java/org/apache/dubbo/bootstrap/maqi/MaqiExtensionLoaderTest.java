@@ -40,7 +40,7 @@ public class MaqiExtensionLoaderTest {
         Assert.assertTrue("error msg : carMaker is not RaceCarMaker", carMaker instanceof RaceCarMaker);
 
         Map<String, String> params = new HashMap<String, String>();
-        params.put("Wheel", "michelin");
+        params.put("wheel.maker", "michelin");
         params.put("Car", "racecar");
         //params.put("Wheel", "adaptive");
         URL url = new URL("", "", 0, params);
@@ -55,7 +55,7 @@ public class MaqiExtensionLoaderTest {
     public void test_WheelWrapper() {
         WheelMaker wheelMaker = ExtensionLoader.getExtensionLoader(WheelMaker.class).getExtension("michelin");
         Assert.assertTrue("wheelMaker is not WheelMakerWrapper", wheelMaker instanceof WheelMakerWrapper);
-        HashMap<String, String> params = new HashMap();
+        HashMap<String, String> params = new HashMap<>();
         params.put("Car", "racecar");
         URL url = new URL("", "", 0, params);
         System.out.println(wheelMaker.makeWheel(url));

@@ -31,7 +31,7 @@ import com.alibaba.dubbo.rpc.proxy.InvokerInvocationHandler;
  */
 public class JavassistProxyFactory extends AbstractProxyFactory {
 
-    //Proxy.getProxy()方法首先会创建类似下面这样的代理类信息，而后再通过 newInstance() 方法来实例化这个代理对象
+    //Proxy.getProxy()方法首先会创建类似下面这样的代理类信息，而后再通过 newInstance(new InvokerInvocationHandler(invoker)) 方法来实例化这个代理对象
     //package org.apache.dubbo.common.bytecode;
     //
     //public class proxy0 implements org.apache.dubbo.demo.DemoService {
@@ -56,6 +56,7 @@ public class JavassistProxyFactory extends AbstractProxyFactory {
     @SuppressWarnings("unchecked")
     public <T> T getProxy(Invoker<T> invoker, Class<?>[] interfaces) {
         // 生成 Proxy 子类（Proxy 是抽象类）。并调用 Proxy 子类的 newInstance 方法创建 Proxy 实例
+        // 这里 newInstance(new InvokerInvocationHandler(invoker)) = new proxy0(InvokerInvocationHandler)!!!!!
         return (T) Proxy.getProxy(interfaces).newInstance(new InvokerInvocationHandler(invoker));
     }
 

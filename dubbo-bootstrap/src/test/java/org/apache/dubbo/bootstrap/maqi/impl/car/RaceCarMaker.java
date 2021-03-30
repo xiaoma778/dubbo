@@ -18,21 +18,22 @@ public class RaceCarMaker implements CarMaker {
      * 设置 WheelMaker
      *
      * @param wheelMaker 通过 SPI 机制 会帮我们注入 WheelMaker$Adaptive 类，该类内容如下：
-     *                   package com.alibaba.dubbo.common.extensionloader.maqi;
-     *                   import com.alibaba.dubbo.common.extension.ExtensionLoader;
+     * package com.alibaba.dubbo.common.extensionloader.maqi;
+     * import com.alibaba.dubbo.common.extension.ExtensionLoader;
      *
-     *                   public class WheelMaker$Adaptive implements com.alibaba.dubbo.common.extensionloader.maqi.WheelMaker {
+     * public class WheelMaker$Adaptive implements com.alibaba.dubbo.common.extensionloader.maqi.WheelMaker {
      *
-     *                   public java.lang.String makeWheel(com.alibaba.dubbo.common.URL arg0) {
-     *                   if (arg0 == null) throw new IllegalArgumentException("url == null");
-     *                   com.alibaba.dubbo.common.URL url = arg0;
-     *                   String extName = url.getParameter("Wheel");
-     *                   if(extName == null)
-     *                   throw new IllegalStateException("Fail to get extension(com.alibaba.dubbo.common.extensionloader.maqi.WheelMaker) name from url(" + url.toString() + ") use keys([Wheel])");
-     *                   com.alibaba.dubbo.common.extensionloader.maqi.WheelMaker extension = (com.alibaba.dubbo.common.extensionloader.maqi.WheelMaker)ExtensionLoader.getExtensionLoader(com.alibaba.dubbo.common.extensionloader.maqi.WheelMaker.class).getExtension(extName);
-     *                   return extension.makeWheel(arg0);
-     *                   }
-     *                   }
+     *      public java.lang.String makeWheel(com.alibaba.dubbo.common.URL arg0) {
+     *          if (arg0 == null)
+     *              throw new IllegalArgumentException("url == null");
+     *          com.alibaba.dubbo.common.URL url = arg0;
+     *          String extName = url.getParameter("Wheel");
+     *          if(extName == null)
+     *              throw new IllegalStateException("Fail to get extension(com.alibaba.dubbo.common.extensionloader.maqi.WheelMaker) name from url(" + url.toString() + ") use keys([Wheel])");
+     *          com.alibaba.dubbo.common.extensionloader.maqi.WheelMaker extension = (com.alibaba.dubbo.common.extensionloader.maqi.WheelMaker)ExtensionLoader.getExtensionLoader(com.alibaba.dubbo.common.extensionloader.maqi.WheelMaker.class).getExtension(extName);
+     *          return extension.makeWheel(arg0);
+     *      }
+     * }
      */
     public void setWheelMaker(WheelMaker wheelMaker) {
         this.wheelMaker = wheelMaker;

@@ -42,15 +42,17 @@
     </bean>
 
     <bean id="dubboRegistryConfig" class="com.alibaba.dubbo.config.RegistryConfig">
-<!--        <property name="address" value="zookeeper://127.0.0.1:2181"/>-->
-        <property name="address" value="zookeeper://zoo1:2181?backup=zoo2:2181,zoo3:2181"/>
+        <property name="address" value="zookeeper://127.0.0.1:2181"/>
+<!--        <property name="address" value="zookeeper://zoo1:2181?backup=zoo2:2181,zoo3:2181"/>-->
+<!--        <property name="file" value="" />-->
     </bean>
 
     <bean id="dubboProtocolConfig" class="com.alibaba.dubbo.config.ProtocolConfig">
+<!--        <property name="server" value="netty4"/>-->
 <!--        <property name="name" value="injvm"/>-->
         <property name="name" value="dubbo"/>
         <property name="port" value="20880"/>
-<!--        <property name="server" value="netty4"/>-->
+        <property name="threads" value="200" />
     </bean>
 
     <bean id="demoServiceBean" class="com.alibaba.dubbo.config.spring.ServiceBean">
@@ -63,6 +65,8 @@
         <property name="version" value="1.0"/>
         <property name="timeout" value="100000"/>
         <property name="scope" value="remote"/>
+        <property name="executes" value="200" />
+        <property name="actives" value="0" />
 <!--        <property name="provider" ref=""/>-->
 <!--        <property name="delay" value="1000" />-->
 <!--        <property name="sent" value="false"/>--><!-- NettyChannel.java类中 108 行说明 -->
@@ -72,6 +76,10 @@
                     <property name="name" value="sayHello"/>
                     <property name="executes" value="15"/>
                     <property name="retries" value="3"/>
+                    <property name="timeout" value="5000" />
+                    <property name="loadbalance" value="leastactive" />
+                    <property name="actives" value="5" />
+<!--                    <property name="arguments" ref="" value="" />-->
                 </bean>
             </list>
         </property>
