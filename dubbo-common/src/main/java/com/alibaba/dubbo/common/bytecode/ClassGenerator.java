@@ -330,18 +330,18 @@ public final class ClassGenerator {
 
     //public class proxy0 implements org.apache.dubbo.demo.DemoService {
     // *
-    //     *     public static java.lang.reflect.Method[] methods;
+    // *     public static java.lang.reflect.Method[] methods;
     // *
-    //     *     private java.lang.reflect.InvocationHandler handler;
+    // *     private java.lang.reflect.InvocationHandler handler;
     // *
-    //     *     public proxy0() {
+    // *     public proxy0() {
     // *     }
     // *
-    //     *     public proxy0(java.lang.reflect.InvocationHandler arg0) {
+    // *     public proxy0(java.lang.reflect.InvocationHandler arg0) {
     // *         handler = arg0;
     // *     }
     // *
-    //     *     public java.lang.String sayHello(java.lang.String arg0) {
+    // *     public java.lang.String sayHello(java.lang.String arg0) {
     // *         Object[] args = new Object[1];
     // *         args[0] = ($w) arg0;
     // *         //最后调用 InvocationHandler.invoke() 方法

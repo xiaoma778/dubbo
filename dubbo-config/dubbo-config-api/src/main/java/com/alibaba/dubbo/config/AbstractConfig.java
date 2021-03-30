@@ -172,7 +172,13 @@ public abstract class AbstractConfig implements Serializable {
         appendParameters(parameters, config, null);
     }
 
-    @SuppressWarnings("unchecked")//将 config 中的数据（方法名以 get、is 打头且是 public 修饰符，且没有参数，且return 类型为 java 的原生类型）添加到 parameters map中去
+    /**
+     * 将 config 中的数据（方法名以 get、is 打头且是 public 修饰符，且没有参数，且return 类型为 java 的原生类型）添加到 parameters map 中去
+     * @param parameters
+     * @param config
+     * @param prefix
+     */
+    @SuppressWarnings("unchecked")
     protected static void appendParameters(Map<String, String> parameters, Object config, String prefix) {
         if (config == null) {
             return;

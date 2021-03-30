@@ -42,8 +42,8 @@
     </bean>
 
     <bean id="dubboRegistryConfig" class="com.alibaba.dubbo.config.RegistryConfig">
-<!--        <property name="address" value="zookeeper://127.0.0.1:2181"/>-->
-        <property name="address" value="zookeeper://zoo1:2181?backup=zoo2:2181,zoo3:2181"/>
+        <property name="address" value="zookeeper://127.0.0.1:2181"/>
+<!--        <property name="address" value="zookeeper://zoo1:2181?backup=zoo2:2181,zoo3:2181"/>-->
     </bean>
 
     <bean id="dubboProtocolConfig" class="com.alibaba.dubbo.config.ProtocolConfig">
@@ -72,6 +72,7 @@
                     <property name="name" value="sayHello"/>
                     <property name="executes" value="15"/>
                     <property name="retries" value="3"/>
+<!--                    <property name="arguments" ref="" value="" />-->
                 </bean>
             </list>
         </property>
