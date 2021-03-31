@@ -31,7 +31,7 @@ import org.junit.Test;
 
 public class ProxyTest extends TestCase {
     public void testMain() throws Exception {
-        Proxy proxy = Proxy.getProxy(ITest.class, ITest.class);
+        Proxy proxy = Proxy.getProxy(ITest.class.getClassLoader(), ITest.class);
         ITest instance = (ITest) proxy.newInstance(new InvocationHandler() {
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                 System.out.println("this is proxy......");
