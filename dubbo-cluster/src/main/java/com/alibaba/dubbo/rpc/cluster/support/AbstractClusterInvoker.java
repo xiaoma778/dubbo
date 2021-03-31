@@ -268,12 +268,15 @@ public abstract class AbstractClusterInvoker<T> implements Invoker<T> {
             ((RpcInvocation) invocation).addAttachments(contextAttachments);
         }
 
-        List<Invoker<T>> invokers = list(invocation);//服务提供者可能会有多个，这里根据 invocation 信息获取到对应的多个服务提供者
+        //服务提供者可能会有多个，这里根据 invocation 信息获取到对应的多个服务提供者
+        List<Invoker<T>> invokers = list(invocation);
         if (invokers != null && !invokers.isEmpty()) {
+            // 加载 LoadBalance
             loadbalance = ExtensionLoader.getExtensionLoader(LoadBalance.class).getExtension(invokers.get(0).getUrl()
                     .getMethodParameter(RpcUtils.getMethodName(invocation), Constants.LOADBALANCE_KEY, Constants.DEFAULT_LOADBALANCE));
         }
         RpcUtils.attachInvocationIdIfAsync(getUrl(), invocation);
+        // 调用 doInvoke 进行后续操作
         return doInvoke(invocation, invokers, loadbalance);
     }
 
